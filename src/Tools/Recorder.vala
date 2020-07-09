@@ -152,7 +152,7 @@ namespace ScreenRec {
             } else if (capture_mode == ScreenrecorderWindow.CaptureType.CURRENT_WINDOW) {
 
                 videosrc.set ("xid", ((Gdk.X11.Window) this.window).get_xid());
-                debug ("Capture current window.");
+                debug ("Capture current window.\n");
 
                 this.startx = 0;
                 this.starty = 0;
@@ -177,7 +177,7 @@ namespace ScreenRec {
                 }
             } else {
 
-                print("Open an error dialog window ?");
+                print("Open an error dialog window ?\n");
             }
 
             debug("setup_video_source \n");
@@ -204,7 +204,7 @@ namespace ScreenRec {
 
                 debug("Format != raw | Format -> " + format);
 
-                if (this.format == "x264enc" || this.format == "x264enc-mkv") {
+                if (this.format == "x264enc" || this.format == "x264enc-mkv" || this.format == "gif") {
 
                     videnc = Gst.ElementFactory.make("x264enc", "video_encoder");
 
@@ -232,7 +232,7 @@ namespace ScreenRec {
 
                 mux = Gst.ElementFactory.make("webmmux", "muxer");
 
-            } else if (format == "x264enc") {
+            } else if (format == "x264enc" || format == "gif") {
 
                 // x264enc supports maximum of four cpu_cores
                 if (cpu_cores > 4) {
@@ -589,7 +589,54 @@ namespace ScreenRec {
             }
             pipeline.send_event (new Gst.Event.eos ());
             this.is_recording = false;
-            this.is_recording_in_progress = false;           
+            this.is_recording_in_progress = false;      
+            
+            // Convert to gif if gif is the format
+            if (this.format == "gif") {
+                try {
+                    var recorded_file = File.new_for_path (this.tmp_file);
+                    
+                    convert_async (recorded_file);
+                } catch (Error e) {
+                    print("An error occured: %s\n", e.message);
+                }
+            } else {
+                print("Not gif\n");
+            }
+        }
+
+        // Convers the video file to gif
+        public File? convert_async (File input_file) throws Error {
+            try {
+                // Setup save path
+                // convert to gif
+                // return the file
+                
+                var tmp_gif_path = input_file.get_path () + ".gif";
+
+                print ("Gif path: %s\n", tmp_gif_path);
+
+                string[] args = {
+                    "ffmpeg",
+                    "-f", "mp4",
+                    "-i", input_file.get_path (),
+                    "-pix_fmt", "yuv420p",
+                    tmp_gif_path
+                };
+
+                var proc = new Subprocess.newv(args, SubprocessFlags.NONE);
+
+                proc.wait_check ();
+
+                var tmp_gif_file = File.new_for_path (tmp_gif_path);
+                tmp_gif_file.move (input_file, FileCopyFlags.OVERWRITE);
+
+                return input_file;
+            } catch (Error e) {
+                print ("Error: %s\n", e.message);
+                
+                throw e;
+            }
         }
     }
 }

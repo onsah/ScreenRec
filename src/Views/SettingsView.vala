@@ -49,9 +49,9 @@ namespace ScreenRec {
                 CODEC_USER,
                 CODEC_EXT
             }
-            public const string[] codec_gsk = {"x264enc", "x264enc-mkv", "vp8enc"};
-            public const string[] codec_user = {"mp4", "mkv", "webm"};
-            public const string[] codec_ext = {".mp4", ".mkv", ".webm"};
+            public const string[] codec_gsk = {"x264enc", "x264enc-mkv", "vp8enc", "gif"};
+            public const string[] codec_user = {"mp4", "mkv", "webm", "gif"};
+            public const string[] codec_ext = {".mp4", ".mkv", ".webm", ".gif"};
             // Disable the use of lossless/Raw codec for now.
             // public const string[] codec_gsk = {"x264enc", "vp8enc", "avenc_huffyuv", "avenc_ljpeg", "raw"};
             // public const string[] codec_user = {"mp4 (h264)", "webm (vp8)", "avi (huffyuv)", "avi (lossless jpeg)", "avi (raw)"};
@@ -156,7 +156,6 @@ namespace ScreenRec {
             Gtk.ListStore list_store = new Gtk.ListStore (3, typeof (string),typeof (string),typeof (string));
 
             for (int i = 0; i < codec_gsk.length; i++) {
-
                 Gtk.TreeIter iter;
                 list_store.append (out iter);
                 list_store.set(iter, Column.CODEC_GSK, codec_gsk[i],
